@@ -1,0 +1,84 @@
+﻿场景1：
+一个服务器(sersync服务器)向多web服务器(rsync服务器）推送数据，一般用于多负载节点的数据同步
+
+应用
+190是sersync服务器，/www/var/目录为要同步到其他节点的目录
+191，192是rsync服务器，/www/var/被同步的目录
+
+
+190
+echo "123456" >/etc/rsync.pas
+chmod 600 /etc/rsync.pas
+
+    <localpath watch="/www/var">
+	<remote ip="192.168.100.191" name="www191"/>
+	<remote ip="192.168.100.192" name="www192"/>
+    </localpath>
+
+    <rsync>
+        <commonParams params="-artuz"/>
+        <auth start="true" users="liutao" passwordfile="/etc/rsync.pas"/>
+        <userDefinedPort start="false" port="874"/><!-- port=874 -->
+        <timeout start="false" time="100"/><!-- timeout=100 -->
+        <ssh start="false"/>
+    </rsync>
+
+/usr/local/sersync/sersync2  -d -r -o /usr/local/sersync/confxml.xml
+lsof -i:874
+
+
+191
+echo "liutao:123456" >/etc/rsync.pas
+chmod 600 /etc/rsync.pas
+
+/etc/rsyncd.conf
+uid = root
+gid = root
+use chroot = no
+max connections = 3
+strict modes = yes
+port = 873
+pid file = /var/run/rsyncd.pid
+lock file = /var/run/rsync.lock
+log file = /var/log/rsyncd/rsyncd.log
+
+[www191]
+comment = www
+path = /var/www/
+read only = no
+write only = no
+list = no
+auth users = liutao
+secrets file = /etc/rsync.pas
+hosts allow = 192.168.100.190
+
+/usr/bin/rsync --daemon --config=/etc/rsyncd.conf
+lsof -i:873
+
+192
+echo "liutao:123456" >/etc/rsync.pas
+chmod 600 /etc/rsync.pas
+
+/etc/rsyncd.conf
+uid = root
+gid = root
+use chroot = no
+max connections = 3
+strict modes = yes
+port = 873
+pid file = /var/run/rsyncd.pid
+lock file = /var/run/rsync.lock
+log file = /var/log/rsyncd/rsyncd.log
+
+[www192]
+comment = www
+path = /var/www/
+read only = no
+write only = no
+list = no
+auth users = liutao
+secrets file = /etc/rsync.pas
+hosts allow = 192.168.100.190
+
+/usr/bin/rsync --daemon --config=/etc/rsyncd.conf
+lsof -i:873

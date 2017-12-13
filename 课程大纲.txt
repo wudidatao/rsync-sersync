@@ -1,0 +1,14 @@
+﻿rsync简介
+rsync自动化部署
+
+sersync简介
+sersync自动化部署
+
+sersync+sync实战_单点集中备份_自动部署
+sersync+sync实战_单点集中备份_自动增加节点
+
+sersync+sync实战_多点推送同步_自动部署 
+sersync+sync实战_多点推送同步_自动增加节点
+
+双向同步
+

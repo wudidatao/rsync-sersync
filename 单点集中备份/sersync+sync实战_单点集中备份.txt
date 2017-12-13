@@ -1,0 +1,80 @@
+﻿场景1：
+多web服务器(sersync服务器)向同一个服务器(rsync服务器)同步数据，一般用于集中日志场景或者是集中备份场景
+
+应用
+190是sersync服务器，/data/logs/目录为190的集中目录，包含/data/logs/191/ /data/logs/192/等分支目录用于分别存放从其他服务器过来的数据
+191，192是rsync服务器，/data/logs/目录就是实际的数据位置
+
+190
+echo"liutao:123456">/etc/rsync.pas
+chmod 600 /etc/rsync.pas
+
+/etc/rsyncd.conf
+uid = root
+gid = root
+use chroot = no
+max connections = 3
+strict modes = yes
+port = 873
+pid file = /var/run/rsyncd.pid
+lock file = /var/run/rsync.lock
+log file = /var/log/rsyncd/rsyncd.log
+
+[191log]
+comment = 191log
+path = /data/logs/191/
+read only = no
+write only = no
+list = no
+auth users = liutao
+secrets file = /etc/rsync.pas
+hosts allow = 192.168.100.191
+
+[192log]
+comment = 192log
+path = /data/logs/192/
+read only = no
+write only = no
+list = no
+auth users = liutao
+secrets file = /etc/rsync.pas
+hosts allow = 192.168.100.192
+
+/usr/bin/rsync --daemon --config=/etc/rsyncd.conf
+lsof -i:873
+
+191
+echo"123456">/etc/rsync.pas
+chmod 600 /etc/rsync.pas
+
+    <localpath watch="/data/logs/">
+	<remote ip="192.168.100.190" name="191log"/>
+    </localpath>
+
+    <rsync>
+        <commonParams params="-artuz"/>
+        <auth start="true" users="liutao" passwordfile="/etc/rsync.pas"/>
+        <userDefinedPort start="false" port="874"/><!-- port=874 -->
+        <timeout start="false" time="100"/><!-- timeout=100 -->
+        <ssh start="false"/>
+    </rsync>
+
+/usr/local/sersync/sersync2  -d -r -o /usr/local/sersync/confxml.xml
+
+192
+echo"123456">/etc/rsync.pas
+chmod 600 /etc/rsync.pas
+
+    <localpath watch="/data/logs/">
+	<remote ip="192.168.100.190" name="192log"/>
+    </localpath>
+
+    <rsync>
+        <commonParams params="-artuz"/>
+        <auth start="true" users="liutao" passwordfile="/etc/rsync.pas"/>
+        <userDefinedPort start="false" port="874"/><!-- port=874 -->
+        <timeout start="false" time="100"/><!-- timeout=100 -->
+        <ssh start="false"/>
+    </rsync>
+
+/usr/local/sersync/sersync2  -d -r -o /usr/local/sersync/confxml.xml

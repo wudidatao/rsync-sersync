@@ -1,0 +1,90 @@
+ÏÂÔØµØÖ·
+https://raw.githubusercontent.com/orangle/sersync/master/release/sersync2.5.4_64bit_binary_stable_final.tar.gz
+
+
+serync²ÎÊýËµÃ÷
+
+-r ¿ªÊ¼ÊµÊ±Í¬²½Ö®Ç°£¬½«µ±Ç°·þÎñÆ÷µÄÊý¾Ý¶¼ÕûÌåÍ¬²½µ½Ô¶³Ì·þÎñÆ÷ÉÏÒ»´Î£¬ÓÃÓÚµÚÒ»´ÎÍ¬²½´óÁ¿Êý¾ÝÊ¹ÓÃ
+-o Ö¸¶¨ÅäÖÃÎÄ¼þ£¬Èç¹ûÏë¿ªÆô¶àÊµÀý£¬¿ÉÒÔÍ¬Ê±Ö¸¶¨¶à¸öÅäÖÃÎÄ¼þ£¬ÓÃ¿Õ¸ñ·Ö¿ª
+-n Ö¸¶¨Í¬²½Ïß³Ì³ØµÄÏß³Ì×ÜÊý£¬Ä¬ÈÏÊÇ10
+-d ºóÌ¨Æô¶¯
+
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<head version="2.5">
+    <host hostip="localhost" port="8008"></host>
+    #²å¼þ±£ÁôÊ¹ÓÃ£¬¶ÔÍ¬²½Ã»ÓÃ£¬Ä¬ÈÏ¼´¿É
+    <debug start="false"/>
+    #debugÄ£Ê½
+    <fileSystem xfs="false"/>
+    #Èç¹ûÊÇxfsÎÄ¼þÏµÍ³£¬±ØÐë²ÎÊýÉèÖÃtrue²ÅÄÜÓÃÍ¬²½
+    <filter start="false">
+        <exclude expression="(.*)\.svn"></exclude>
+        <exclude expression="(.*)\.gz"></exclude>
+        <exclude expression="^info/*"></exclude>
+        <exclude expression="^static/*"></exclude>
+    </filter>
+    #¹ýÂË²»Í¬²½µÄÎÄ¼þÀàÐÍ£¬start="true"£¬Ä¬ÈÏ²»¿ªÆô¹ýÂË
+    <inotify>
+        <delete start="true"/>
+        <createFolder start="true"/>
+        <createFile start="false"/>
+        <closeWrite start="true"/>
+        <moveFrom start="true"/>
+        <moveTo start="true"/>
+        <attrib start="false"/>
+        <modify start="false"/>
+    </inotify>
+    #Ö¸¶¨Í¬²½µÄÀàÐÍ£¬createFileÉèÖÃfalse£¬ÒòÎªÒ»¸öÎÄ¼þ´´½¨Ê±Ò²»á´¥·¢closeWrite£¬Ö»ÉèÖÃºóÕß¼´¿É
+    <sersync>
+        <localpath watch="/opt/tongbu">
+	#×¼±¸ÏòÔ¶³ÌÍ¬²½µÄ±¾µØÄ¿Â¼
+            <remote ip="127.0.0.1" name="tongbu1"/>
+	    #ÒªÍ¬²½µ½µÄÔ¶³ÌÄ¿Â¼µÄ·þÎñÆ÷ip£¬ÒÔ¼°Ä£¿éÃû£¬×¢ÒâÕâÀï²»ÄÜÓÃÎÄ¼þ¼ÐÃû£¬Ö»ÄÜÓÃrsyncÄ£¿éÃû
+            <!--<remote ip="192.168.8.39" name="tongbu"/>-->
+            <!--<remote ip="192.168.8.40" name="tongbu"/>-->
+        </localpath>
+        <rsync>
+            <commonParams params="-artuz"/>
+	    #Í¬²½Ö´ÐÐµÄÃüÁî
+            <auth start="false" users="root" passwordfile="/etc/rsync.pas"/>
+	    #Ê¹ÓÃµÄÍ¬²½ÕËºÅºÍÃÜÂë
+            <userDefinedPort start="false" port="874"/><!-- port=874 -->
+	    #ÊÇ·ñÊ¹ÓÃÄ¬ÈÏ¶Ë¿Ú
+            <timeout start="false" time="100"/><!-- timeout=100 -->
+            <ssh start="false"/>
+        </rsync>
+	#Í¬²½Ê±£¬Èç¹û³öÏÖ´íÎó»á½«ÐÅÏ¢Ð´ÈëÕâ¸öÎÄ¼þ£¬Ä¬ÈÏ60·ÖÖÓÖØ½¨Ò»´ÎÕâ¸öÎÄ¼þ£¬Í¨¹ýÕâ¸öÎÄ¼þ¿ÉÒÔÁË½âµ½ÄÄÐ©ÎÄ¼þÍ¬²½Ê§°ÜÁË
+        <failLog path="/tmp/rsync_fail_log.sh" timeToExecute="60"/><!--default every 60mins execute once-->
+        <crontab start="false" schedule="600"><!--600mins-->
+            <crontabfilter start="false">
+                <exclude expression="*.php"></exclude>
+                <exclude expression="info/*"></exclude>
+            </crontabfilter>
+        </crontab>
+        <plugin start="false" name="command"/>
+    </sersync>
+
+    <plugin name="command">
+        <param prefix="/bin/sh" suffix="" ignoreError="true"/>  <!--prefix /opt/tongbu/mmm.sh suffix-->
+        <filter start="false">
+            <include expression="(.*)\.php"/>
+            <include expression="(.*)\.sh"/>
+        </filter>
+    </plugin>
+
+    <plugin name="socket">
+        <localpath watch="/opt/tongbu">
+            <deshost ip="192.168.138.20" port="8009"/>
+        </localpath>
+    </plugin>
+    <plugin name="refreshCDN">
+        <localpath watch="/data0/htdocs/cms.xoyo.com/site/">
+            <cdninfo domainname="ccms.chinacache.com" port="80" username="xxxx" passwd="xxxx"/>
+            <sendurl base="http://pic.xoyo.com/cms"/>
+            <regexurl regex="false" match="cms.xoyo.com/site([/a-zA-Z0-9]*).xoyo.com/images"/>
+        </localpath>
+    </plugin>
+</head>
+
+Æô¶¯·½Ê½
+/usr/local/sersync/sersync2  -d -r -o /usr/local/sersync/confxml.xml
